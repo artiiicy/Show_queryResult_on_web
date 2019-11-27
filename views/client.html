@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+        <title>hello world</title>
+        <link rel='stylesheet' href='/stylesheets/style.css' />
+        <script type="text/javascript">
+        var ajax = null;
+        function doAction(){
+                var input = document.getElementById("input1");
+                var callback = function(){
+                        var target = document.getElementById("msg");
+                 	
+			var res = JSON.parse(ajax.getResponse());
+			var result = "Query Result<br>"//"<tr align = \"center\"><p><td>Query Result</td></p></tr>";
+			for(var field in res.msg[0])
+				result += "<td>" + field + "</td>";
+			result += "</tr>";
+
+			for(var i = 0; i < res.msg.length; i++)
+			{
+				result += "<tr>";
+				for(var field in res.msg[i])
+					result += "<td>" + JSON.stringify(res.msg[i][field]) + "</td>";
+				result += "</tr>";
+			}
+			
+
+			target.innerHTML = result;
+                }
+                ajax = new AjaxObject('/hello?input1=' + input.value,callback);
+        }
+
+        function AjaxObject(url,callback)
+        {
+                var response = null;
+                var callback = callback;
+                ajaxStart(url);
+                this.getResponse = function()
+                {
+                        return response;
+                }
+                function ajaxStart(url){
+                        var req = createRequest();
+                        if (req == null){
+                                alert("Hello World");
+                                return;
+                        }
+                        req.open("POST",url);
+                        req.setRequestHeader ("User-Agent","XMLHttpRequest");
+                        req.onreadystatechange = function()
+                        {
+                                if (this.readyState == 4 && this.status == 200)
+                                {
+                                         precallback(this); }
+                                }
+                                req.send();
+                        }
+
+                        function createRequest(){
+                                var httplist = [
+                                        function(){
+                                                return new XMLHttpRequest(); },
+                                        function(){
+                                                return new ActiveXObjct ("Msxml2.XMLHTTP"); },
+function(){
+                                                return new ActiveXObject ("Microsoft.XMLHTTP"); } ];
+                                for(var i = 0;i < httplist.length;i++){
+                                        try {
+                                                var http = httplist[i]();
+                                                if (http != null) return http;
+                                        } catch(e){ continue; }
+                                }
+                                return null;
+                                }
+                                function precallback(request){
+                                        response = request.responseText;
+                                        callback();
+                                }
+                        }
+        </script>
+        </head>
+
+<body onload="init()">
+        <h1>Test</h1>
+        <table id="msg" border = "1"></table>
+        <form id="form1" name="form1" method="post" action="/hello"
+                onsubmit="return false;">
+        <input type="text" id="input1" name="input1" value="enter something">
+        <input type="button" id="btn" value="click" onclick="doAction();">
+ </form>
+</body>
+</html>
